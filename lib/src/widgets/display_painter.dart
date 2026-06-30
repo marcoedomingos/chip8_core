@@ -1,5 +1,6 @@
-import 'package:chip8_core/core/data/chip8.dart';
 import 'package:flutter/material.dart';
+import '../emulator/chip8.dart';
+import '../emulator/processor.dart';
 
 class DisplayPainter extends CustomPainter {
   final Chip8 chip;
@@ -8,21 +9,21 @@ class DisplayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Drwa the pixels in white
     final bgPaint = Paint()..color = const Color(0xFF000000);
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
 
     final pixelPaint = Paint()..color = const Color(0xFFFFFFFF);
 
-    // Calculate pixel size based on the available canvas size
-    final double pixelWidth = size.width / 64;
-    final double pixelHeight = size.height / 32;
+    final double pixelWidth = size.width / Processor.width;
+    final double pixelHeight = size.height / Processor.height;
 
-    // Go through the display pixels and draw them
+    // Go through the pixels
     for (int i = 0; i < chip.display.length; i++) {
       if (chip.display[i] == 1) {
-        // Calculate the X and Y using the col as default
-        final double x = (i % 64) * pixelWidth;
-        final double y = (i ~/ 64) * pixelHeight;
+        // Calculte the X and Y using the col as default
+        final double x = (i % Processor.width) * pixelWidth;
+        final double y = (i ~/ Processor.width) * pixelHeight;
 
         // Draw the result in the display
         canvas.drawRect(

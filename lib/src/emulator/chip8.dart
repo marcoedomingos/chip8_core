@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:chip8_core/core/data/processor.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'processor.dart';
 
 class Chip8 extends Processor with ChangeNotifier {
   Timer? _timer;
@@ -17,7 +17,7 @@ class Chip8 extends Processor with ChangeNotifier {
     _timer = Timer.periodic(const Duration(milliseconds: 16), (t) {
       if (!isRunning) return;
 
-      /// Chip8 runs at 500-700Hz.
+      /// CHIP-8 typically runs at ~500-700Hz.
       /// At 60fps (16ms), ~10 cycles per frame is a good baseline.
       for (int i = 0; i < 10; i++) {
         cycle();
