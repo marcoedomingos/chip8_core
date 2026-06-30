@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 class Processor {
@@ -5,7 +6,9 @@ class Processor {
   static const int height = 32;
   static const int romStart = 0x200;
 
-  final Uint16List ram = Uint16List(4096);
+  final Random _random = Random();
+
+  final Uint8List ram = Uint8List(4096);
   final Uint8List display = Uint8List(width * height);
   final Uint8List keyPad = Uint8List(16);
 
@@ -18,6 +21,9 @@ class Processor {
   int soundTimer = 0;
 
   bool isRunning = false;
+
+  /// Returns true if the sound timer is active.
+  bool get isSoundActive => soundTimer > 0;
 
   static const List<int> fontSet = [
     0xF0, 0x90, 0x90, 0x90, 0xF0,
@@ -39,11 +45,28 @@ class Processor {
   ];
 
   void init() {
+    reset();
+    isRunning = true;
+  }
+
+  /// Resets the emulator state to default.
+  void reset() {
+    ram.fillRange(0, ram.length, 0);
+    display.fillRange(0, display.length, 0);
+    flags.fillRange(0, flags.length, 0);
+    keyPad.fillRange(0, keyPad.length, 0);
+    stack.fillRange(0, stack.length, 0);
+    
+    index = 0;
+    executionPointer = romStart;
+    stackPointer = 0;
+    delayTimer = 0;
+    soundTimer = 0;
+
     /// This will set the fonts to our memory
     for (int i = 0; i < fontSet.length; i++) {
       ram[i] = fontSet[i];
     }
-    isRunning = true;
   }
 
   void loadRom(List<int> data) {
@@ -96,7 +119,7 @@ class Processor {
       case 0x9: if (flags[x] != flags[y]) executionPointer += 2; break;
       case 0xA: index = n12; break;
       case 0xB: executionPointer = flags[0] + n12; break;
-      case 0xC: flags[x] = (DateTime.now().microsecond & 0xFF) & n8; break;
+      case 0xC: flags[x] = _random.nextInt(256) & n8; break;
       case 0xD: _drawSprite(flags[x], flags[y], n4); break;
       case 0xE:
         if (n8 == 0x9E && keyPad[flags[x]] == 1) executionPointer += 2;
@@ -143,7 +166,7 @@ class Processor {
       for (int c = 0; c < 8; c++) {
         if ((sprite & (0x80 >> c)) != 0) {
           final px = (xPos + c) % width;
-          final py = (yPos + r) % height;
+          final py = (yPos + h) % height;
           final idx = px + py * width;
           if (display[idx] == 1) flags[0xF] = 1;
           display[idx] ^= 1;

@@ -4,6 +4,7 @@ import 'processor.dart';
 
 class Chip8 extends Processor with ChangeNotifier {
   Timer? _timer;
+  int cyclesPerFrame = 10;
 
   void parseRom(List<int> rom) {
     loadRom(rom);
@@ -19,7 +20,7 @@ class Chip8 extends Processor with ChangeNotifier {
 
       /// CHIP-8 typically runs at ~500-700Hz.
       /// At 60fps (16ms), ~10 cycles per frame is a good baseline.
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < cyclesPerFrame; i++) {
         cycle();
       }
       updateTimers();
