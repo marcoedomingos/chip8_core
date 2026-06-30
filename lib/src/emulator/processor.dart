@@ -45,7 +45,10 @@ class Processor {
   ];
 
   void init() {
-    reset();
+    /// This will set the fonts to our memory
+    for (int i = 0; i < fontSet.length; i++) {
+      ram[i] = fontSet[i];
+    }
     isRunning = true;
   }
 
@@ -82,7 +85,8 @@ class Processor {
 
     /// Chip8 opcode is a 16bits instruction, meaning the we need to 2 bytes
     /// from the memory to get full insctruction block.
-    final opcode = (ram[executionPointer] << 8) | ram[executionPointer + 1];
+    final opcode = (ram[executionPointer % 4096] << 8) | 
+                   ram[(executionPointer + 1) % 4096];
 
     /// Now that we have our opcode, we can set our executionPointer into the next
     /// instruction
@@ -103,11 +107,11 @@ class Processor {
     switch (first) {
       case 0x0:
         if (opcode == 0x00E0) display.fillRange(0, display.length, 0);
-        if (opcode == 0x00EE) executionPointer = stack[--stackPointer];
+        if (opcode == 0x00EE) executionPointer = stack[(--stackPointer) % 16];
         break;
       case 0x1: executionPointer = n12; break;
       case 0x2:
-        stack[stackPointer++] = executionPointer;
+        stack[(stackPointer++) % 16] = executionPointer;
         executionPointer = n12;
         break;
       case 0x3: if (flags[x] == n8) executionPointer += 2; break;
@@ -162,11 +166,11 @@ class Processor {
   void _drawSprite(int xPos, int yPos, int h) {
     flags[0xF] = 0;
     for (int r = 0; r < h; r++) {
-      final sprite = ram[index + r];
+      final sprite = ram[(index + r) % 4096];
       for (int c = 0; c < 8; c++) {
         if ((sprite & (0x80 >> c)) != 0) {
           final px = (xPos + c) % width;
-          final py = (yPos + h) % height;
+          final py = (yPos + r) % height;
           final idx = px + py * width;
           if (display[idx] == 1) flags[0xF] = 1;
           display[idx] ^= 1;
@@ -187,12 +191,12 @@ class Processor {
       case 0x1E: index = (index + flags[x]) & 0xFFFF; break;
       case 0x29: index = flags[x] * 5; break;
       case 0x33:
-        ram[index] = flags[x] ~/ 100;
-        ram[index + 1] = (flags[x] ~/ 10) % 10;
-        ram[index + 2] = flags[x] % 10;
+        ram[index % 4096] = flags[x] ~/ 100;
+        ram[(index + 1) % 4096] = (flags[x] ~/ 10) % 10;
+        ram[(index + 2) % 4096] = flags[x] % 10;
         break;
-      case 0x55: for (int i = 0; i <= x; i++) ram[index + i] = flags[i]; break;
-      case 0x65: for (int i = 0; i <= x; i++) flags[i] = ram[index + i]; break;
+      case 0x55: for (int i = 0; i <= x; i++) ram[(index + i) % 4096] = flags[i]; break;
+      case 0x65: for (int i = 0; i <= x; i++) flags[i] = ram[(index + i) % 4096]; break;
     }
   }
 
