@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:chip8_core/core/domain/hardware.dart';
 import 'package:chip8_core/core/domain/software.dart';
 
@@ -282,27 +280,6 @@ class Processor extends Hardware with Software {
     }
     if (soundTimer > 0) {
       soundTimer--;
-    }
-  }
-
-  void output(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = const Color(0xFF000000);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
-
-    // Drwa the pixels in white
-    final pixelPaint = Paint()..color = const Color(0xFFFFFFFF);
-
-    // Go through the 2048 pixels
-    for (int i = 0; i < col * row; i++) {
-      if (display[i] == 1) {
-        // Calculte the X and Y using the col as default
-        final double x = (i % col) * 10;
-        final double y =
-            (i ~/ col) * 10;
-
-        // Draw the result in the displayÏ
-        canvas.drawRect(Rect.fromLTWH(x, y, 10, 10), pixelPaint);
-      }
     }
   }
 }

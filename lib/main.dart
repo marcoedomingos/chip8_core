@@ -37,6 +37,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _focusNode.dispose();
+    chip8.dispose();
     super.dispose();
   }
 
@@ -113,14 +114,12 @@ class _MyAppState extends State<MyApp> {
                 }
               },
               child: SizedBox(
-                width: 64 * 10, // Largura total escalada (640)
-                height: 32 * 10, // Altura total escalada (320)
+                width: 64 * 10, // Scaled width (640)
+                height: 32 * 10, // Scaled height (320)
                 child: ListenableBuilder(
                   listenable: chip8,
-                  builder: (_, w) => SizedBox(
-                    width: 64,
-                    height: 32,
-                    child: CustomPaint(painter: DisplayPainter(chip: chip8)),
+                  builder: (_, w) => CustomPaint(
+                    painter: DisplayPainter(chip: chip8),
                   ),
                 ),
               ),
